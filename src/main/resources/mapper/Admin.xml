@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="o2oboot.dao.AdminDao">
+    <resultMap id="adminMap" type="o2oboot.entity.Admin">
+        <id column="admin_id" property="adminID"/>
+        <result column="admin_name" property="adminName"/>
+        <result column="admin_password" property="adminPassword"/>
+        <result column="gender" property="gender"/>
+    </resultMap>
+    <select id="queryAdminSignIn" resultMap="adminMap" parameterType="String">
+        select admin_id,admin_password
+        from admin
+        where admin_id=#{adminID} and admin_password=#{adminPassword}
+    </select>
+</mapper>

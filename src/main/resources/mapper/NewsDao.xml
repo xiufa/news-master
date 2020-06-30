@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="o2oboot.dao.NewsDao">
+    <insert id="insertNews" parameterType="o2oboot.entity.News" useGeneratedKeys="true"
+            keyColumn="news_id" keyProperty="newsId">
+        insert into tb_news(        news_id,news_name,news_category_id,views,priority,create_time
+        ) values(
+            #{newsId},#{newsName},#{newsCategory.newsCategoryId}
+            ,#{views},#{priority}#{createTime}
+        )
+    </insert>
+
+    <update id="updateNews" parameterType="o2oboot.entity.News" >
+
+        update tb_news
+        <set>
+            <if test="newsName!=null">news_name=#{newsName},</if>
+
+            <if test="priority!=null">priority=#{priority},</if>
+
+            <if test="newsCategory!=null">news_category_id=#{newsCategory.newsCategoryId},</if>
+            <if test="views!=null">views=#{views},</if>
+
+
+        </set>
+
+        where news_id=#{newsId}
+
+    </update>
+
+
+    <resultMap id="newsMap" type="o2oboot.entity.News">
+        <id column="news_id" property="newsId"/>
+        <result column="news_name" property="newsName"/>
+
+        <result column="priority" property="priority"/>
+        <result column="create_time" property="createTime"/>
+        <result column="views" property="views"/>
+
+
+        <association column="news_category_id" property="newsCategory" javaType="o2oboot.entity.NewsCategory">
+            <id column="news_category_id" property="newsCategoryId"/>
+            <result column="news_category_name" property="newsCategoryName"/>
+        </association>
+
+
+
+    </resultMap>
+
+    <select id="queryNewsById" resultMap="newsMap" parameterType="Long">
+        select
+        n.news_id,  n.news_name, n.priority, n.create_time,
+        n.views,
+        nc.news_category_id,nc.news_category_name
+
+        from
+        tb_news n,tb_news_category nc
+        where
+        n.news_category_id=nc.news_category_id
+
+        and
+        s.news_id=#{newsId}
+
+
+    </select>
+
+
+    <select id="queryAllNews" resultMap="newsMap">
+
+        select
+       n.news_id,  n.news_name, n.priority, n.create_time,n.views
+
+        nc.news_category_id,nc.news_category_name
+
+        from
+        tb_news n,tb_news_Category nc
+        where
+        n.shop_category_id=nc.shop_category_id
+
+
+    </select>
+
+
+    <select id="queryNewsList" resultMap="newsMap">
+
+        select
+        n.news_id,  n.news_name, n.priority, n.create_time,
+
+        nc.news_category_id,nc.news_category_name
+        from
+        tb_news n,tb_news_category nc
+
+
+
+        <where>
+            <if test="newsCondition.newsCategory!=null and newsCondition.newsCategory.newsCategoryId!=null">
+                and n.news_category_id=#{newsCondition.newsCategory.newsCategoryId}
+            </if>
+
+
+            <if test="newsCondition.newsCategory!=null
+                   and newsCondition.newsCategory.parent!=null
+                   and newsCondition.newsCategory.parent.newsCategoryId!=null">
+
+                and n.news_category_id in (select news_category_id from tb_news_category where
+                parent_id=#{newsCondition.newsCategory.parent.newsCategoryId
+                })
+            </if>
+
+
+            <if test="newsCondition.newsName!=null">
+                and n.news_name like '%${newsCondition.newsName}%'
+            </if>
+
+
+
+            and
+            n.shop_category_id=nc.shop_category_id
+
+
+
+        </where>
+        order by
+        n.priority desc
+        limit #{rowIndex},#{pageSize}
+
+    </select>
+    
+    
+    <select id="queryNewsCount" resultType="int">
+        select
+        count(1)
+        from
+        tb_news n,tb_news_category nc
+
+
+
+        <where>
+            <if test="newsCondition.newsCategory!=null and newsCondition.newsCategory.newsCategoryId!=null">
+                and n.news_category_id=#{newsCondition.newsCategory.newsCategoryId}
+            </if>
+
+
+            <if test="newsCondition.newsCategory!=null
+                   and newsCondition.newsCategory.parent!=null
+                   and newsCondition.newsCategory.parent.newsCategoryId!=null">
+
+                and n.news_category_id in (select news_category_id from tb_news_category where
+                parent_id=#{newsCondition.newsCategory.parent.newsCategoryId
+                })
+            </if>
+
+
+            <if test="newsCondition.newsName!=null">
+                and n.news_name like '%${newsCondition.newsName}%'
+            </if>
+
+
+
+            and
+            n.shop_category_id=nc.shop_category_id
+
+
+
+        </where>
+
+    </select>
+
+</mapper>
